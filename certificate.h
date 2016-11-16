@@ -7,17 +7,16 @@
 
 struct Cert {
     bool label;
-    Cert* next;
+    Cert *next;
 };
 
-/**
- *
- * @param c1
- * @param c2
- * @return true if c1 is before c2 or c1 is equal to c2
- */
-bool lex_cmp(Cert* c1, Cert* c2);
+struct CertHead {
+    CertHead *next;
+    CertHead *prev;
+    Cert *first;
+};
 
 
+void push(CertHead &start, CertHead &new_head);
 
 #endif //PAL_CONNECTED_NETWORKS_CERTIFICATE_H
