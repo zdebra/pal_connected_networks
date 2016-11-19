@@ -27,23 +27,14 @@ bool lex_cmp(Cert &c1, Cert &c2)
 
 };
 
-void swap(CertHead &c1, CertHead &c2, CertHead &c1_pred) {
-
-    c1_pred.next = &c2;
-    c1.next = c2.next;
-    c2.next = &c1;
-
-}
-
-void swap_first(CertHead &c1, CertHead &c2) {
-    c1.next = c2.next;
-    c2.next = &c1;
-}
-
-
 void push(CertHead &start, CertHead &new_head) {
 
-    if(lex_cmp(*start.first, *new_head.first)) {
+    if(start.first == nullptr) {
+
+        start.first = new_head.first;
+
+    }
+    else if(lex_cmp(*start.first, *new_head.first)) {
 
         Cert *tmp = start.first;
         start.first = new_head.first;
@@ -58,6 +49,11 @@ void push(CertHead &start, CertHead &new_head) {
 
         CertHead *cur = start.next;
         bool end = false;
+
+        if(cur == 0) {
+            end = true;
+            cur = &start;
+        }
         while(!lex_cmp(*cur->first, *new_head.first) && !end) {
             if(cur->next == 0) {
                 end = true;

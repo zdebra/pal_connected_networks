@@ -12,7 +12,7 @@ struct Edge {
 struct Node {
     int neighbor_count;
     Edge *neighbor;
-    //int label;
+    CertHead *certificate;
 };
 
 Node *nodes;
@@ -31,8 +31,33 @@ void add_neighbor(Node& source, Node& neighbor, Edge& edge) {
     }
 }
 
+void cut_leaf(Node &node) {
+
+    node.neighbor_count = 0;
+
+    // push the certificate to where is neighbor count non zero (parent)
+    Edge *cur = node.neighbor;
+    while(cur->target->neighbor_count == 0) {
+        cur = cur->next;
+    }
+    Node *parent = cur->target;
+
+    if(node.certificate->first == nullptr) {
+        Cert *head = new Cert();
+        head->label = 0;
+        Cert *tail = new Cert();
+        tail->label = 1;
+        head->next = tail;
+        node.certificate->first = head;
+    }
+
+    push(*parent->certificate, *node.certificate);
+    parent->neighbor_count--;
+
+}
+
 int main() {
-/*
+
     int nodes_total, total_connections;
     Edge *edges;
 
@@ -50,100 +75,57 @@ int main() {
         std::cin >> finish;
 
         nodes[start].neighbor_count++;
-        nodes[start].label = start;
+        if(nodes[start].certificate == nullptr) {
+            nodes[start].certificate = new CertHead();
+        }
+
         add_neighbor(nodes[start], nodes[finish], edges[edge_counter]);
         edge_counter++;
 
 
         nodes[finish].neighbor_count++;
-        nodes[finish].label = finish;
+        if(nodes[finish].certificate == nullptr) {
+            nodes[finish].certificate = new CertHead();
+        }
+
+
         add_neighbor(nodes[finish], nodes[start], edges[edge_counter]);
         edge_counter++;
     }
 
 
+    // run algorithm
+    int cutted;
+    do {
+        cutted = 0;
 
-    // printing
-    for(int i=0; i<nodes_total; i++) {
-        std::cout << "node" << i << "("<< nodes[i].neighbor_count <<"): ";
-        Edge* next = nodes[i].neighbor;
-        while(next!=NULL) {
-            std::cout << next->target->label << ", ";
-            next = next->next;
+        for(int i=0; i<nodes_total; i++) {
+
+            // if it is a leaf
+            if(nodes[i].neighbor_count == 1) {
+
+                cut_leaf(nodes[i]);
+                cutted++;
+
+            }
+
         }
-        std::cout << std::endl;
+
+    } while(cutted > 0);
+
+    int c;
+    for(int i=0; i<nodes_total; i++) {
+        if(nodes[i].neighbor_count != 0) {
+
+            Node n = nodes[i];
+            c++;
+
+        }
     }
-     */
-
-    // {1}
-    Cert *h1 = new Cert();
-    h1->label = 1;
 
 
-    // {0,1}
-    Cert *h2 = new Cert();
-    h2->label = 0;
-    Cert *c21 = new Cert();
-    c21->label = 1;
-    h2->next = c21;
-
-
-    // {1, 1, 1}
-    Cert *h3 = new Cert();
-    Cert *c31 = new Cert();
-    Cert *c32 = new Cert();
-    h3->label = 1;
-    c31->label = 1;
-    c32->label = 1;
-    h3->next = c31;
-    c31->next = c32;
-
-    CertHead *ch1 = new CertHead();
-    ch1->first = h1;
-    CertHead *ch2 = new CertHead();
-    ch2->first = h2;
-    CertHead *ch3 = new CertHead();
-    ch3->first = h3;
-
-    ch1->next = ch2;
-    ch2->prev = ch1;
-    ch2->next = ch3;
-    ch3->prev = ch2;
-
-    // {1}
-    Cert *c1 = new Cert();
-    c1->label = 1;
-    CertHead *ch4 = new CertHead();
-    ch4->first = c1;
-    push(*ch1,*ch4);
-
-    // {0}
-    CertHead *ch5 = new CertHead();
-    Cert *c2 = new Cert();
-    c2->label = 0;
-    ch5->first = c2;
-
-    push(*ch1,*ch5);
-
-
-    // {1, 1, 1, 1}
-    Cert *c3 = new Cert();
-    Cert *c4 = new Cert();
-    Cert *c5 = new Cert();
-    Cert *c6 = new Cert();
-    c3->label = 1;
-    c3->next = c4;
-    c4->label = 1;
-    c4->next = c5;
-    c5->label = 1;
-    c5->next = c6;
-    c6->label = 1;
-
-    CertHead *ch6 = new CertHead();
-    ch6->first = c3;
-
-    push(*ch1,*ch6);
-    
+    delete nodes;
+    delete edges;
 
     return 0;
 }
